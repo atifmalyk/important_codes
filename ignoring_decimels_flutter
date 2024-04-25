@@ -1,0 +1,12 @@
+Following is the function to set the limit of TextField in flutter by ignoring the deciel part
+# Following is the dart code
+  validatePriceLimit(value) {
+    var newValue = num.tryParse(value!) ?? 0;
+    List<String> parts = value.split('.');
+    int charCountBeforeDecimal = parts[0].length;
+    if (value.toString().isEmpty || newValue < 1) {
+      return Strings.required.tr;
+    } else if (charCountBeforeDecimal > 16 ) {
+      return "Max length exceeded";
+    }
+  }
