@@ -1,0 +1,64 @@
+import 'dart:io' show Platform;
+
+class OrdersView extends StatelessWidget {
+  final TradeController controller;
+  final ScrollController parentScrollController;
+
+  OrdersView(this.controller, {Key? key, required this.parentScrollController})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final ScrollController listScrollController = ScrollController();
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollUpdateNotification &&
+            notification.scrollDelta != null) {
+          // Top boundary: scrolling up
+          if (listScrollController.position.pixels <= 0 &&
+              notification.scrollDelta! < 0) {
+            double newParentOffset =
+                parentScrollController.offset - notification.scrollDelta!;
+            if (newParentOffset >= 0) {
+              parentScrollController.jumpTo(newParentOffset);
+            }
+            return false; // Propagate to parent
+          }
+          // Bottom boundary: scrolling down
+          if (listScrollController.position.pixels >=
+              listScrollController.position.maxScrollExtent &&
+              notification.scrollDelta! > 0) {
+            double newParentOffset =
+                parentScrollController.offset - notification.scrollDelta!;
+            if (newParentOffset <= parentScrollController.position.maxScrollExtent) {
+              parentScrollController.jumpTo(newParentOffset);
+            }
+            return false; // Propagate to parent
+          }
+        } else if (notification is OverscrollNotification) {
+          // Top overscroll: scrolling up
+          if (listScrollController.position.pixels <= 0 &&
+              notification.overscroll < 0) {
+            double newParentOffset =
+                parentScrollController.offset + notification.overscroll;
+            if (newParentOffset >= 0) {
+              parentScrollController.jumpTo(newParentOffset);
+            }
+            return false; // Propagate to parent
+          }
+          // Bottom overscroll: scrolling down
+          if (listScrollController.position.pixels >=
+              listScrollController.position.maxScrollExtent &&
+              notification.overscroll > 0) {
+            double newParentOffset =
+                parentScrollController.offset + notification.overscroll;
+            if (newParentOffset <= parentScrollController.position.maxScrollExtent) {
+              parentScrollController.jumpTo(newParentOffset);
+            }
+            return false; // Propagate to parent
+          }
+        }
+        return true; // Consume scroll event for ListView
+      },
+      child: ListView.builder(
